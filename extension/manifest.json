@@ -3,7 +3,7 @@
  
     "name": "AliExpress Total Price",
     "description": "This extension will show total price (price + shipping costs) on catalog pages",
-    "version": "0.0.1",
+    "version": "1.0.0",
  
     "browser_action": {
         "default_icon": "icon.png",
@@ -11,13 +11,19 @@
     },
 
     "content_scripts": [{
-        "css": ["styles.css"],
-        "js": ["content.js"],
-        "matches": ["https://*.aliexpress.com/*"]
+        "css": [
+            "styles.css"
+        ],
+        "js": [
+            "jquery-2.2.4.min.js",
+            "content.js"
+        ],
+        "matches": [
+            "https://*.aliexpress.com/*"
+        ]
      }],
 
     "permissions": [
         "activeTab"
-
     ]
 }
