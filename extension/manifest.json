@@ -1,29 +1,55 @@
 {
-    "manifest_version": 2,
- 
     "name": "AliExpress Total Price",
     "description": "This extension will show total price (price + shipping costs) on catalog pages",
     "version": "1.0.0",
- 
+    "manifest_version": 2,
+    "minimum_chrome_version": "5.0",
     "browser_action": {
-        "default_icon": "icon.png",
-        "default_popup": "popup.html"
+        "default_icon": "img/icon-128.png"
+        //"default_popup": "popup.html"
     },
-
+    "icons": {
+        "16":  "img/icon-16.png",
+        "32":  "img/icon-32.png",
+        "48":  "img/icon-48.png",
+        "128": "img/icon-128.png"
+    },
     "content_scripts": [{
         "css": [
-            "styles.css"
+            "css/styles.css"
         ],
         "js": [
-            "jquery-2.2.4.min.js",
+            "js/jquery-2.2.4.min.js",
+            "js/catalog.js",
+            //"js/cookies.js",
             "content.js"
         ],
         "matches": [
             "https://*.aliexpress.com/*"
         ]
      }],
-
+    "background": {
+        "scripts": [
+            "js/cookies.js"
+        ],
+        "persistent": true
+//        "matches": [
+//            "https://*.aliexpress.com/*"
+//        ]
+    },
+    "devtools_page": "html/devtools.html",
+    "web_accessible_resources": [
+        "css/*.css",
+        "img/*.png",
+        "img/*.svg",
+        "js/*.js",
+        "html/*.html"
+    ],
     "permissions": [
-        "activeTab"
+        "activeTab",
+        "webRequest",
+        "webRequestBlocking",
+        //"*://*/*"
+        "*://*.aliexpress.com/*"
     ]
 }

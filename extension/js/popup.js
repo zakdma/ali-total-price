@@ -1,4 +1,8 @@
- document.addEventListener('DOMContentLoaded', function() {
+/*
+ * Copyright (C) 2018 Myroslav Dobra (dmaraptor@gmail.com).
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
     var checkPageButton = document.getElementById('checkPage');
     checkPageButton.addEventListener('click', function() {
         chrome.tabs.getSelected(null, function(tab) {
