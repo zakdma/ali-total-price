@@ -6,7 +6,6 @@
     "minimum_chrome_version": "5.0",
     "browser_action": {
         "default_icon": "img/icon-128.png"
-        //"default_popup": "popup.html"
     },
     "icons": {
         "16":  "img/icon-16.png",
@@ -21,7 +20,6 @@
         "js": [
             "js/jquery-2.2.4.min.js",
             "js/catalog.js",
-            //"js/cookies.js",
             "content.js"
         ],
         "matches": [
@@ -32,10 +30,10 @@
         "scripts": [
             "js/cookies.js"
         ],
-        "persistent": true
-//        "matches": [
-//            "https://*.aliexpress.com/*"
-//        ]
+        "persistent": true,
+        "matches": [
+            "https://*.aliexpress.com/*"
+        ]
     },
     "devtools_page": "html/devtools.html",
     "web_accessible_resources": [
@@ -49,7 +47,6 @@
         "activeTab",
         "webRequest",
         "webRequestBlocking",
-        //"*://*/*"
         "*://*.aliexpress.com/*"
     ]
 }
