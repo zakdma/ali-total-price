@@ -6,16 +6,17 @@
     "use strict";
 
     var removeCookieFromSearchRequest = function(details) {
-        console.log(details);
+        writeToConsole('Start processing');
         //var bkg = chrome.extension.getBackgroundPage();
         //bkg.console.log('processing');
         details.requestHeaders.forEach(function(requestHeader){
             if (requestHeader.name.toLowerCase() === "cookie") {
                 var newValue = processCookieStr(requestHeader.value);
-                writeToConsole(newValue);
                 requestHeader.value = newValue;
             }
         });
+
+        writeToConsole('Finish processing');
 
         return {
             requestHeaders: details.requestHeaders
@@ -33,6 +34,7 @@ var cookieToRemove = 'xman_us_f';
 
 var processCookieStr = function(cookiesStr) {
     var cookieStrList = cookiesStr.split('; ');
+    writeToConsole('Cookies in count: ' + cookieStrList.length);
     var newStrList = [];
     cookieStrList.forEach(function(cookieStr){
         cookieStr = cookieStr.trim();
@@ -44,7 +46,7 @@ var processCookieStr = function(cookiesStr) {
         }
     });
 
-    writeToConsole('headers out count: ' + newStrList.length);
+    writeToConsole('Cookies out count: ' + newStrList.length);
     return newStrList.join("; ");
 };
 
