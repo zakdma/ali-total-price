@@ -43,7 +43,13 @@ String.prototype.atpSprintf = function(data)
     return result;
 };
 
-function injectScriptIntoPage(scriptName)
+function atpLogToConsole(message) {
+    if(window.console) {
+        console.log(message);
+    }
+}
+
+function atpInjectScriptIntoPage(scriptName)
 {
     var s = document.createElement('script');
     // TODO: add "scriptName" to web_accessible_resources in manifest.json

@@ -4,47 +4,38 @@
  * See LICENSE.md for license details.
  */
 
+/**
+ * Subscribe event and inject script that retrieve local data from page window object
+ * It needed because content script is working in sandbox and have no access to page local data.
+ */
 function atpHandlePrices()
+{
+    //console.log("add event");
+    document.addEventListener('atpLocalDataEvent', function (e) {
+        var localData = e.detail;
+        //console.log("received " + localData);
+        atpStartProcessing(localData);
+    });
+
+    //console.log("inject");
+    atpInjectScriptIntoPage('js/injection.js');
+}
+
+/**
+ * Start processing items after local data received
+ */
+function atpStartProcessing(localData)
 {
     // Get all product list items from current page
     var items = jQuery('.list-item');
     // Iterate though each item and show total price
     items.each(function (index) {
         var item = jQuery(this);
-
-        atpProcessItem(item);
-
-        // var shippingCost = getItemShippingCost(item);
-        // var price = atpGetItemPrice(item);
-        //
-        // if (shippingCost != null) {
-        //     shippingCost = shippingCost.prices[0].value;
-        // } else {
-        //     shippingCost = 0;
-        // }
-        //
-        // if (price != null) {
-        //     var value = price.prefix;
-        //     var first = true;
-        //     for(var i = 0; i < price.prices.length; i++) {
-        //         if (!first) {
-        //             value += ' - ';
-        //         }
-        //         var priceValue = price.prices[i].value + shippingCost;
-        //         value += priceValue.toFixed(2).replace('.', price.prices[i].splitter);
-        //         first = false;
-        //     }
-        //
-        //     var priceRow = item.find('span.price');
-        //     var priceRowNew = priceRow.clone();
-        //     //priceRowNew.css({background: '#FF4C4C', color: 'white'});
-        //     priceRowNew.find('.value').text(value).css({background: '#FF4C4C', color: 'white'});
-        //     priceRow.after(priceRowNew);
-        // }
+        atpProcessItem(item, localData);
     });
 }
 
-function atpProcessItem(item) {
+function atpProcessItem(item, localData) {
     var price = atpGetItemPrice(item);
     if (price != null) {
         var minPrice = price.prices[0].value;
@@ -55,7 +46,7 @@ function atpProcessItem(item) {
         var productId = atpGetProductId(item);
         if (productId) {
             item.atpProductId = productId;
-            var shippingRequestData = atpCreateShippingRequestData(productId, minPrice, maxPrice);
+            var shippingRequestData = atpCreateShippingRequestData(productId, minPrice, maxPrice, localData);
             atpSendShippingCostsRequest(item, shippingRequestData);
         }
     }
@@ -75,7 +66,7 @@ function atpGetProductId(item)
     return productId;
 }
 
-function atpCreateShippingRequestData(productId, minPrice, maxPrice)
+function atpCreateShippingRequestData(productId, minPrice, maxPrice, localData)
 {
     //window.runParams.ship_from
     //window.runParams.ship_to
@@ -83,10 +74,10 @@ function atpCreateShippingRequestData(productId, minPrice, maxPrice)
 
     var shippingRequestData = {
         'productId': productId,
-        'countryFromCode': '',
-        'countryToCode': 'UA',
-        'currencyCode': 'USD',
-        'transactionCurrencyCode': 'USD',
+        'countryFromCode': localData.shipFrom,
+        'countryToCode': localData.shipTo,
+        'currencyCode': localData.currency,
+        'transactionCurrencyCode': localData.currency,
         'minPrice': minPrice,
         'maxPrice': maxPrice,
         'timestamp': Date.now()
@@ -179,12 +170,6 @@ function atpShippingCostsErrorHandler(itemData)
     atpLogToConsole(message);
 }
 
-function atpLogToConsole(message) {
-    if(window.console) {
-        console.log(message);
-    }
-}
-
 function atpRequestShippingRatesUrl(shippingRequestData)
 {
     var urlTpl = 'https://freight.aliexpress.com/ajaxFreightCalculateService.htm?f=d&productid={{productId}}&count=1&minPrice={{minPrice}}&maxPrice={{maxPrice}}&currencyCode={{currencyCode}}&transactionCurrencyCode={{transactionCurrencyCode}}&sendGoodsCountry={{countryFromCode}}&country={{countryToCode}}&province=&city=&abVersion=1&_={{timestamp}}';
@@ -258,6 +243,7 @@ function atpGetPriceValue(value)
         result.prices.push(price);
     }
 
+    //console.log(value+': '+result.prefix);
     return result;
 }
 
@@ -269,6 +255,7 @@ function atpGetPriceValue(value)
  */
 function atpParsePrice(value)
 {
+    //console.log(value);
     var result = {
         first: '',
         second: '',
@@ -277,6 +264,7 @@ function atpParsePrice(value)
     };
 
     value = value.replace(/[^\d,\.]/g, '');
+    //console.log(value);
     var lastIndex = value.regexLastIndexOf(/[^\d]/g);
 
     if (lastIndex >= 0) {
@@ -289,5 +277,6 @@ function atpParsePrice(value)
     result.first = result.first.replace(/[^\d]/g, '');
     result.value = Number(result.first + '.' + result.second);
 
+    //console.log(value+': '+result.first+'|'+result.second+'|'+result.splitter+'|'+result.value+'|');
     return result;
 }
