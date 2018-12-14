@@ -4,27 +4,7 @@
  * See LICENSE.md for license details.
  */
 
-String.prototype.regexLastIndexOf = function(regex, startpos) {
-    regex = (regex.global) ?
-        regex :
-        new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
-    if(typeof (startpos) == "undefined") {
-        startpos = this.length;
-    } else if(startpos < 0) {
-        startpos = 0;
-    }
-    var stringToWorkWith = this.substring(0, startpos + 1);
-    var lastIndexOf = -1;
-    var nextStop = 0;
-    while((result = regex.exec(stringToWorkWith)) != null) {
-        lastIndexOf = result.index;
-        regex.lastIndex = ++nextStop;
-    }
-
-    return lastIndexOf;
-};
-
-function handlePrices() {
+function atpHandlePrices() {
     // Get all product list items from current page
     var items = jQuery('.list-item');
     // Iterate though each item and show total price
@@ -158,12 +138,3 @@ function parsePrice(value)
 
     return result;
 }
-
-
-// var images = document.getElementsByTagName('img');
-// alert(images.length);
-// for (var i = 0, l = images.length; i < l; i++) {
-//     images[i].src = 'http://placekitten.com/' + images[i].width + '/' + images[i].height;
-// }
-
-

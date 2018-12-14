@@ -3,3 +3,37 @@
  * Copyright (C) 2018 Myroslav Dobra (myroslav.dobra@gmail.com).
  * See LICENSE.md for license details.
  */
+
+.atp-loader-spinner {
+    border: 3px solid #f3f3f3; /* Light grey */
+    /*border-top: 2px solid #3498db;*/ /* Blue */
+    border-top: 2px solid #f60; /* Orange */
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    animation: atp-spin 2s linear infinite;
+    display: inline-block;
+}
+
+@keyframes atp-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.atp-item-loader {
+
+}
+
+.atp-item-loader > span.error{
+    color: red !important;
+    font-weight: bold !important;
+}
+
+.atp-shipping-cost {
+
+}
+
+.atp-shipping-cost > .value {
+    background: #FF4C4C !important;
+    color: white !important;
+}

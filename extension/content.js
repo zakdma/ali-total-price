@@ -6,4 +6,4 @@
 
 // Main script
 
-handlePrices();
+atpHandlePrices();
