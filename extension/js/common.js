@@ -59,3 +59,14 @@ function atpInjectScriptIntoPage(scriptName)
     };
     (document.head || document.documentElement).appendChild(s);
 }
+
+Number.prototype.atpFormatNumber = function(decimalSeparator, thousandSeparator)
+{
+    var result = this.toFixed(2);
+    if (thousandSeparator.length > 0) {
+        result = result.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
+    }
+    result = result.replace('.', decimalSeparator);
+
+    return result;
+};

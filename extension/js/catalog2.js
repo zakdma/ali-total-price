@@ -47,7 +47,7 @@ function atpProcessItem(item, localData) {
         if (productId) {
             item.atpProductId = productId;
             var shippingRequestData = atpCreateShippingRequestData(productId, minPrice, maxPrice, localData);
-            atpSendShippingCostsRequest(item, shippingRequestData);
+            atpSendShippingCostsRequest(item, shippingRequestData, price.prices[0].format);
         }
     }
 }
@@ -86,7 +86,7 @@ function atpCreateShippingRequestData(productId, minPrice, maxPrice, localData)
     return shippingRequestData;
 }
 
-function atpSendShippingCostsRequest(item, shippingRequestData)
+function atpSendShippingCostsRequest(item, shippingRequestData, priceFormatData)
 {
     var url = atpRequestShippingRatesUrl(shippingRequestData);
 
@@ -100,7 +100,8 @@ function atpSendShippingCostsRequest(item, shippingRequestData)
     var itemData = {
         "item": item,
         "requestData": shippingRequestData,
-        "loaderContainer": priceRowLoader
+        "loaderContainer": priceRowLoader,
+        formatData: priceFormatData
     };
 
     jQuery.ajax({
@@ -146,15 +147,21 @@ function atpRenderShippingCost(itemData, rate) {
 
     var value = '';
     if (rate != null) {
-        // Need to get price prefix like 'USD $'
-        var shippingCostParsed = atpGetPriceValue(rate.localPriceFormatStr);
-        value = shippingCostParsed.prefix;
+        debugger;
+        value = itemData.formatData.prefix;
         var priceValue = itemData.requestData.minPrice + 1*rate.localPrice;
-        value += priceValue.toFixed(2).replace('.', shippingCostParsed.prices[0].splitter);
+        value += priceValue.atpFormatNumber(
+            itemData.formatData.decimalSeparator,
+            itemData.formatData.thousandSeparator
+        );
         if (itemData.requestData.maxPrice != itemData.requestData.minPrice) {
             priceValue = itemData.requestData.maxPrice + 1*rate.localPrice;
-            value += ' - ' + priceValue.toFixed(2).replace('.', shippingCostParsed.prices[0].splitter);
+            value += ' - ' + priceValue.atpFormatNumber(
+                itemData.formatData.decimalSeparator,
+                itemData.formatData.thousandSeparator
+            );
         }
+        value += itemData.formatData.suffix;
     }
 
     if (value.length) {
@@ -230,16 +237,40 @@ function atpGetPriceValue(value)
 {
     var result = {
         prefix: '',
+        suffix: '',
         prices: []
     };
-    var prefixPos = value.search(/\d/g);
-    if (prefixPos >= 0) {
-        result.prefix = value.substr(0, prefixPos);
+    var regex = /\d/g;
+    var match,
+        matchCount = 1,
+        startPos = -1,
+        endPos = -1,
+        valueClear = value;
+
+    while(match = regex.exec(value)){
+        if (matchCount == 1) {
+            startPos = regex.lastIndex - 1;
+        }
+        endPos = regex.lastIndex - 1;
+        matchCount++;
     }
 
-    var prices = value.split('-');
+    if (startPos > 0) {
+        result.prefix = value.substr(0, startPos);
+    }
+    if (endPos < value.length - 1) {
+        result.suffix = value.substr(endPos + 1);
+    }
+
+    startPos = startPos > 0 ? startPos : 0;
+    endPos = endPos > 0 ? endPos : value.length;
+    valueClear = value.substr(startPos, endPos - startPos + 1);
+
+    var prices = valueClear.split('-');
     for(var i = 0; i < prices.length; i++) {
         var price = atpParsePrice(prices[i]);
+        price.format.prefix = result.prefix;
+        price.format.suffix = result.suffix;
         result.prices.push(price);
     }
 
@@ -258,21 +289,32 @@ function atpParsePrice(value)
     //console.log(value);
     var result = {
         first: '',
-        second: '',
-        splitter: '',
+        second: '00',
+        format: {
+            decimalSeparator: '.',
+            thousandSeparator: ''
+        },
         value: NaN
     };
 
-    value = value.replace(/[^\d,\.]/g, '');
+    //value = value.replace(/[^\d,\.]/g, '');
+    value = value.trim();
     //console.log(value);
-    var lastIndex = value.regexLastIndexOf(/[^\d]/g);
 
+    // Extract decimal separator (point)
+    var lastIndex = value.regexLastIndexOf(/[^\d]/g);
     if (lastIndex >= 0) {
         result.first = value.substr(0, lastIndex);
         result.second = value.substr(lastIndex + 1);
-        result.splitter = value.substr(lastIndex, 1);
+        result.format.decimalSeparator = value.substr(lastIndex, 1);
     } else {
         result.first = value;
+    }
+
+    // Extract thousand separator
+    lastIndex = result.first.regexLastIndexOf(/[^\d]/g);
+    if (lastIndex >= 0) {
+        result.format.thousandSeparator = result.first.substr(lastIndex, 1);
     }
     result.first = result.first.replace(/[^\d]/g, '');
     result.value = Number(result.first + '.' + result.second);
