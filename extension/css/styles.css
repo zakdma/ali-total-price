@@ -33,7 +33,9 @@
 
 }
 
-.atp-shipping-cost > .value {
+.atp-shipping-cost > .value,
+.atp-shipping-cost .price-current
+{
     background: #FF4C4C !important;
     color: white !important;
 }
