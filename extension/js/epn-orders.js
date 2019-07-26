@@ -31,7 +31,7 @@ function atpOrdersListButtonClick(event) {
             var orderStatus = row.find("td p.table-status-name").text().trim();
             var orderAmount = row.find('td span:not([class])').text().trim();
             orderAmount = orderAmount.replace(/[^\d\.,]/g, '');
-            list += orderNumber + "\t" + orderStatus + "\t" + orderAmount + "\n";
+            list += orderNumber /*+ "\t" + orderStatus + "\t" + orderAmount*/ + "\n";
         });
         textArea.text(list);
         textArea.css({display: 'block'});

@@ -28,30 +28,31 @@ function atpOrdersListButtonClick(event) {
             var orderStatus = row.find("tr.order-body td.order-status span").text().trim();
             var orderAmount = row.find("tr.order-head td.order-amount p.amount-num").text().trim();
             orderAmount = orderAmount.atpReplaceAll(/[^\d\.,]/g, '');
-            if (orderStatus != "Closed"
-                && orderStatus != "Awaiting Cancellation"
-                && orderStatus != " Payment not yet confirmed"
-                && orderStatus != "Awaiting payment"
-            ) {
-                //list += orderNumber + "\t" + orderStatus + "\t" + orderAmount + "\n";
-                var orderItems = row.find("tr.order-body");
-                orderItems.each(function (index1, el1) {
-                    var item = jQuery(el1);
-                    var numberHref = item.find('td.product-sets p.product-snapshot a').attr('href').trim();
-                    var number = atpExtractOrderIdFromLink(numberHref);
-                    var spans = item.find('td.product-sets p.product-amount span');
-                    var itemSum = 0;
-                    if (spans.length >= 2) {
-                        var priceText = jQuery(spans[0]).text().trim();
-                        var amountText = jQuery(spans[1]).text().trim();
-                        var price = priceText.atpReplaceAll(/[^\d\.,]/g, "").trim();
-                        var amount = amountText.atpReplaceAll(/[^\d\.,]/g, "").trim();
-                        itemSum = price * amount;
-                    }
-                    list += number + "\t" + orderStatus + "\t" + itemSum.toFixed(2) + "\n";
-                });
-            }
-
+            //list += orderNumber + "\t" + orderStatus + "\t" + orderAmount + "\n";
+            var orderItems = row.find("tr.order-body");
+            orderItems.each(function (index1, el1) {
+                var item = jQuery(el1);
+                var numberHref = item.find('td.product-sets p.product-snapshot a').attr('href').trim();
+                var number = atpExtractOrderIdFromLink(numberHref);
+                var itemStatus = orderStatus;
+                var itemStatusEl = jQuery(item.find('td.product-action span')[0]);
+                if (itemStatusEl.length && !itemStatusEl.find('a').length) {
+                    itemStatus = itemStatusEl.text().trim();
+                }
+                var spans = item.find('td.product-sets p.product-amount span');
+                var itemSum = 0;
+                if (spans.length >= 2) {
+                    var priceText = jQuery(spans[0]).text().trim();
+                    var amountText = jQuery(spans[1]).text().trim();
+                    var price = priceText.atpReplaceAll(/[^\d\.,]/g, "").trim();
+                    var amount = amountText.atpReplaceAll(/[^\d\.,]/g, "").trim();
+                    itemSum = price * amount;
+                }
+                alert(priceText+": "+itemStatus);
+                if (itemStatus.indexOf('Cancel') < 0) {
+                    list += number /*+ "\t" + orderStatus + "\t" + itemSum.toFixed(2)*/ + "\n";
+                }
+            });
         });
         textArea.text(list);
         textArea.css({display: 'block'});
